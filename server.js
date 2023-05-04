@@ -1,7 +1,8 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-
+const socket = require('socket.io');
+const messages = [];
 app.use(express.static(path.join(__dirname, '/client'))); // Serve static files from the React app
 app.use(express.urlencoded({ extended: false })); //x-www-form-urlencoded
 
@@ -13,6 +14,21 @@ app.use((req, res) => {
   res.status(404).send('404 not found...');
 });
 
-app.listen(process.env.PORT || 8000, () => {
+const server = app.listen(process.env.PORT || 8000, () => {
   console.log('Server is running on port: 8000');
+});
+
+const io = socket(server);
+
+io.on('connection', (socket) => {
+  console.log('New client! Its id - ' + socket.id);
+  socket.on('message', (message) => {
+    console.log("Oh, I've got something from " + socket.id);
+    messages.push(message);
+    socket.broadcast.emit('message', message);
+  });
+  socket.on('disconnect', () => {
+    console.log('Oh, socket ' + socket.id + ' has left');
+  });
+  console.log("I've added a listener on message and disconnect events \n");
 });
