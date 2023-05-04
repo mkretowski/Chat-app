@@ -20,7 +20,7 @@ const login = (event) => {
   if (!userName) {
     return alert('Please enter your username.');
   }
-
+  socket.emit('join', userName);
   // hide login form and show messages section
   loginForm.classList.remove('show');
   messagesSection.classList.add('show');
@@ -35,7 +35,6 @@ const sendMessage = (event) => {
     alert('You have to type something!');
   } else {
     addMessage(userName, messageContent);
-    console.log(userName);
     socket.emit('message', { author: userName, content: messageContent });
     messageContentInput.value = '';
   }
@@ -46,6 +45,7 @@ const addMessage = (author, content) => {
   message.classList.add('message');
   message.classList.add('message--received');
   if (author === userName) message.classList.add('message--self');
+  if (author === 'Chat Bot') message.classList.add('message--chatbot');
   message.innerHTML = `
       <h3 class="message__author">${userName === author ? 'You' : author}</h3>
       <div class="message__content">
